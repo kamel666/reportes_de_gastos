@@ -1,759 +1,374 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full bg-slate-950 text-slate-100">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>¡Feliz Cumpleaños Saúl Cristian! 🤘🔥</title>
+  <title>Control Privado de Gastos - Perú (S/)</title>
   
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Oswald:wght@400;600;700&family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Inter Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- html2pdf.js para exportación a PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+            }
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    :root {
-      --bg-dark: #0a0a0c;
-      --panel-bg: #141419;
-      --metal-red: #ff1a40;
-      --metal-orange: #ff6600;
-      --metal-gold: #ffb700;
-      --text-main: #f0f0f5;
-      --text-muted: #a0a0b0;
-      --border-glow: rgba(255, 26, 64, 0.4);
+    button, input, select {
+      touch-action: manipulation;
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
     }
-
-    body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      font-family: 'Montserrat', sans-serif;
-      overflow-x: hidden;
-      padding-bottom: 50px;
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
     }
-
-    /* Background Canvas Animation */
-    #fx-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    /* Container layout */
-    .app-container {
-      position: relative;
-      z-index: 2;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 15px;
-    }
-
-    /* Header Section */
-    header {
-      text-align: center;
-      padding: 25px 10px 15px;
-    }
-
-    .subtitle-badge {
-      display: inline-block;
-      background: linear-gradient(90deg, var(--metal-red), var(--metal-orange));
-      color: #fff;
-      font-family: 'Oswald', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      padding: 4px 14px;
-      border-radius: 20px;
-      margin-bottom: 12px;
-      box-shadow: 0 0 15px var(--border-glow);
-    }
-
-    h1.metal-title {
-      font-family: 'Metal Mania', cursive;
-      font-size: 2.8rem;
-      line-height: 1.1;
-      color: #fff;
-      text-shadow: 0 0 10px var(--metal-red), 0 0 20px var(--metal-orange);
-      margin-bottom: 8px;
-    }
-
-    @media (min-width: 600px) {
-      h1.metal-title {
-        font-size: 4rem;
-      }
-    }
-
-    p.tagline {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      font-weight: 500;
-    }
-
-    /* Common Card Styles */
-    .card {
-      background: var(--panel-bg);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(10px);
-    }
-
-    .card-title {
-      font-family: 'Oswald', sans-serif;
-      font-size: 1.25rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--metal-gold);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-
-    /* Carousel Styling */
-    .carousel-container {
-      position: relative;
-      width: 100%;
-      border-radius: 12px;
-      overflow: hidden;
-      aspect-ratio: 4 / 3;
-      background: #000;
-      touch-action: pan-y;
-      border: 2px solid rgba(255, 26, 64, 0.3);
-    }
-
-    .carousel-track {
-      display: flex;
-      width: 100%;
-      height: 100%;
-      transition: transform 0.4s ease-out;
-    }
-
-    .carousel-slide {
-      min-width: 100%;
-      height: 100%;
-      position: relative;
-    }
-
-    .carousel-slide img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .slide-caption {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 15px 12px;
-      background: linear-gradient(transparent, rgba(0,0,0,0.9));
-      color: #fff;
-      font-size: 0.9rem;
-      font-weight: 600;
-      text-align: center;
-    }
-
-    .carousel-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(0,0,0,0.6);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.2);
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 5;
-      font-size: 1.1rem;
-    }
-
-    .carousel-btn.prev { left: 10px; }
-    .carousel-btn.next { right: 10px; }
-
-    .upload-box {
-      margin-top: 12px;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .btn-upload {
-      background: rgba(255,255,255,0.05);
-      border: 1px dashed var(--metal-orange);
-      color: var(--metal-gold);
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* Audio Player Component */
-    .player-visualizer {
-      width: 100%;
-      height: 60px;
-      background: #08080a;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      display: flex;
-      align-items: flex-end;
-      padding: 5px;
-      gap: 3px;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .bar {
-      flex: 1;
-      background: linear-gradient(to top, var(--metal-red), var(--metal-orange), var(--metal-gold));
-      height: 10%;
-      border-radius: 2px;
-      transition: height 0.05s ease;
-    }
-
-    .controls-row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
-
-    .btn-rock {
-      background: linear-gradient(135deg, var(--metal-red), #b3001e);
-      color: #fff;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-family: 'Oswald', sans-serif;
-      font-size: 1rem;
-      letter-spacing: 1px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 4px 15px var(--border-glow);
-      flex: 1;
-      justify-content: center;
-      min-width: 140px;
-    }
-
-    .btn-rock:active {
-      transform: scale(0.97);
-    }
-
-    .volume-box {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--text-muted);
-      font-size: 0.9rem;
-    }
-
-    /* Soundboard Grid */
-    .soundboard-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    @media (min-width: 500px) {
-      .soundboard-grid {
-        grid-template-columns: repeat(4, 1fr);
-      }
-    }
-
-    .pad-btn {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px;
-      padding: 15px 10px;
-      text-align: center;
-      color: var(--text-main);
-      cursor: pointer;
-      transition: all 0.15s ease;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .pad-btn i {
-      font-size: 1.4rem;
-      color: var(--metal-orange);
-    }
-
-    .pad-btn span {
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-
-    .pad-btn:active, .pad-btn.active {
-      background: rgba(255, 102, 0, 0.2);
-      border-color: var(--metal-orange);
-      transform: scale(0.95);
-    }
-
-    /* Greeting Card Section */
-    .greeting-box {
-      font-size: 0.95rem;
-      line-height: 1.6;
-      color: #e0e0e0;
-      border-left: 3px solid var(--metal-red);
-      padding-left: 15px;
-      margin-bottom: 15px;
-    }
-
-    .btn-whatsapp {
-      background: #25D366;
-      color: #fff;
-      border: none;
-      width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
-    }
-
-    /* Footer */
-    footer {
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.8rem;
-      padding-top: 10px;
+    ::-webkit-scrollbar-thumb {
+      background: rgba(51, 65, 85, 0.8);
+      border-radius: 4px;
     }
   </style>
 </head>
-<body>
+<body class="h-full flex flex-col font-sans antialiased bg-slate-950 text-slate-100 selection:bg-brand-500 selection:text-white pb-20 sm:pb-0">
 
-  <canvas id="fx-canvas"></canvas>
-
-  <div class="app-container">
-    
-    <!-- HEADER -->
-    <header>
-      <span class="subtitle-badge">🤘 Heavy Metal Birthday 🤘</span>
-      <h1 class="metal-title">SAÚL CRISTIAN</h1>
-      <p class="tagline">¡Que el rock y el metal retumben hoy en tu honor!</p>
-    </header>
-
-    <!-- CAROUSEL DE FOTOS -->
-    <div class="card">
-      <div class="card-title">
-        <i class="fa-solid fa-images"></i>
-        <span>Galería de Rocker</span>
-      </div>
-
-      <div class="carousel-container" id="carousel">
-        <div class="carousel-track" id="carouselTrack">
-          <!-- Slide 1 -->
-          <div class="carousel-slide">
-            <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80" alt="Guitarra Metal">
-            <div class="slide-caption">🔥 ¡Feliz Cumpleaños Saúl Cristian! 🔥</div>
-          </div>
-          <!-- Slide 2 -->
-          <div class="carousel-slide">
-            <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80" alt="Concierto Rock">
-            <div class="slide-caption">🎸 ¡Que nunca paren los riffs y la buena música! 🎸</div>
-          </div>
-          <!-- Slide 3 -->
-          <div class="carousel-slide">
-            <img src="https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=800&q=80" alt="Luces de Concierto">
-            <div class="slide-caption">🚀 Un año más rompiéndola al máximo nivel.</div>
-          </div>
+  <!-- HEADER TIPO APP MÓVIL -->
+  <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-30 px-4 py-3 shadow-lg">
+    <div class="max-w-md mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center font-bold text-white shadow-md shadow-emerald-900/40 text-lg">
+          S/
         </div>
-
-        <button class="carousel-btn prev" id="prevBtn"><i class="fa-solid fa-chevron-left"></i></button>
-        <button class="carousel-btn next" id="nextBtn"><i class="fa-solid fa-chevron-right"></i></button>
-      </div>
-
-      <div class="upload-box">
-        <label for="imgUploader" class="btn-upload">
-          <i class="fa-solid fa-cloud-arrow-up"></i>
-          <span>Añadir tus fotos con Saúl</span>
-        </label>
-        <input type="file" id="imgUploader" accept="image/*" multiple style="display: none;">
-      </div>
-    </div>
-
-    <!-- REPRODUCTOR / SINTETIZADOR METAL -->
-    <div class="card">
-      <div class="card-title">
-        <i class="fa-solid fa-compact-disc"></i>
-        <span>Música & Riff De Fondo</span>
-      </div>
-
-      <div class="player-visualizer" id="visualizer">
-        <!-- Generado dinámicamente -->
-      </div>
-
-      <div class="controls-row">
-        <button class="btn-rock" id="playBtn">
-          <i class="fa-solid fa-play"></i>
-          <span>Tocar Riff Metal</span>
-        </button>
-
-        <div class="volume-box">
-          <i class="fa-solid fa-volume-high"></i>
-          <input type="range" id="volRange" min="0" max="1" step="0.1" value="0.7">
+        <div>
+          <h1 class="text-base font-bold tracking-tight text-white leading-none">Mi Control Privado</h1>
+          <p class="text-xs text-slate-400 font-medium mt-0.5" id="headerDateText">Cargando fecha...</p>
         </div>
       </div>
+      <button onclick="toggleSettingsModal()" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-all active:scale-95" title="Ajustes y Privacidad">
+        <i data-lucide="settings" class="w-5 h-5"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="flex-1 overflow-y-auto px-3 py-4 max-w-md mx-auto w-full space-y-4">
+
+    <!-- TARJETA PRINCIPAL: CICLO DE 6 DÍAS / S/ 100 -->
+    <div class="bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700/80 rounded-2xl p-4 shadow-xl relative overflow-hidden">
+      <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+      <!-- Selector de Ciclo Activo -->
+      <div class="flex items-center justify-between mb-3 border-b border-slate-700/60 pb-2.5">
+        <div class="flex items-center space-x-2">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <i data-lucide="repeat" class="w-3 h-3 mr-1"></i> Ciclo Activo
+          </span>
+          <span id="cycleLabel" class="text-xs font-bold text-slate-200">Ciclo 1</span>
+        </div>
+        <select id="cycleSelector" onchange="changeCycle(this.value)" class="bg-slate-950 text-xs font-medium text-emerald-400 border border-slate-700 rounded-lg px-2 py-1 focus:outline-none focus:border-emerald-500">
+        </select>
+      </div>
+
+      <!-- Valores Principales -->
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div>
+          <p class="text-xs text-slate-400 font-medium">Presupuesto Recibido</p>
+          <p class="text-xl font-bold text-white mt-0.5">S/ <span id="cycleBudgetDisplay">100.00</span></p>
+        </div>
+        <div class="text-right">
+          <p class="text-xs text-slate-400 font-medium">Disponible en Ciclo</p>
+          <p id="remainingDisplay" class="text-xl font-extrabold text-emerald-400 mt-0.5">S/ 100.00</p>
+        </div>
+      </div>
+
+      <!-- Barra de Progreso -->
+      <div class="space-y-1.5">
+        <div class="flex justify-between text-xs text-slate-400 font-medium">
+          <span>Gastado: <strong id="cycleSpentDisplay" class="text-slate-200">S/ 0.00</strong></span>
+          <span id="progressPercent">0%</span>
+        </div>
+        <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden p-0.5 border border-slate-700/50">
+          <div id="progressBar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- BOTONES RÁPIDOS DE ACCIÓN -->
+      <div class="mt-3 pt-3 border-t border-slate-700/60 grid grid-cols-3 gap-2">
+        <button onclick="startNewCycle()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold py-2 px-1 rounded-xl transition-all shadow flex items-center justify-center space-x-1 active:scale-95">
+          <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+          <span>+ S/ 100</span>
+        </button>
+        
+        <button onclick="shareWhatsApp()" class="bg-emerald-800/80 hover:bg-emerald-700 text-emerald-100 text-[11px] font-bold py-2 px-1 rounded-xl transition-all shadow flex items-center justify-center space-x-1 active:scale-95 border border-emerald-500/30">
+          <i data-lucide="send" class="w-3.5 h-3.5 text-emerald-300"></i>
+          <span>WhatsApp</span>
+        </button>
+
+        <button onclick="exportCyclePDF()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-bold py-2 px-1 rounded-xl transition-all shadow flex items-center justify-center space-x-1 active:scale-95 border border-slate-700">
+          <i data-lucide="file-text" class="w-3.5 h-3.5 text-rose-400"></i>
+          <span>PDF Ciclo</span>
+        </button>
+      </div>
     </div>
 
-    <!-- SOUNDBOARD INTERACTIVO -->
-    <div class="card">
-      <div class="card-title">
-        <i class="fa-solid fa-drum"></i>
-        <span>Efectos Metaleros</span>
-      </div>
-
-      <div class="soundboard-grid">
-        <button class="pad-btn" onclick="triggerSound('solo')">
-          <i class="fa-solid fa-guitar"></i>
-          <span>Solo Rápido</span>
-        </button>
-        <button class="pad-btn" onclick="triggerSound('drums')">
-          <i class="fa-solid fa-drum"></i>
-          <span>Doble Pedal</span>
-        </button>
-        <button class="pad-btn" onclick="triggerSound('cheer')">
-          <i class="fa-solid fa-people-group"></i>
-          <span>Público</span>
-        </button>
-        <button class="pad-btn" onclick="triggerFx()">
-          <i class="fa-solid fa-fire-flame-curved"></i>
-          <span>Fuego & Púas</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- SALUDO & MENSAJE -->
-    <div class="card">
-      <div class="card-title">
-        <i class="fa-solid fa-envelope-open-text"></i>
-        <span>Dedicatoria Especial</span>
-      </div>
-
-      <div class="greeting-box">
-        <p><strong>¡Hermano Saúl Cristian!</strong> 🤘🎉</p>
-        <p>Hoy en tu cumpleaños te deseo lo mejor de lo mejor. Que este nuevo año venga cargado de salud, proyectos cumplidos y sobre todo muchísima música de la buena, riffs potentes y conciertos inolvidables. ¡A celebrar como se debe!</p>
-      </div>
-
-      <button class="btn-whatsapp" onclick="sendWhatsApp()">
-        <i class="fa-brands fa-whatsapp"></i>
-        <span>Enviar Saludo por WhatsApp</span>
+    <!-- PESTAÑAS DE NAVEGACIÓN -->
+    <div class="grid grid-cols-3 gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
+      <button onclick="switchTab('hoy')" id="tabHoy" class="py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center space-x-1 bg-emerald-600 text-white shadow">
+        <i data-lucide="sun" class="w-3.5 h-3.5"></i>
+        <span>Hoy</span>
+      </button>
+      <button onclick="switchTab('historial')" id="tabHistorial" class="py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center space-x-1 text-slate-400 hover:text-slate-200">
+        <i data-lucide="history" class="w-3.5 h-3.5"></i>
+        <span>Historial Días</span>
+      </button>
+      <button onclick="switchTab('mes')" id="tabMes" class="py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center space-x-1 text-slate-400 hover:text-slate-200">
+        <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+        <span>Resumen Mes</span>
       </button>
     </div>
 
-    <footer>
-      Hecho especialmente para Saúl Cristian • Happy Birthday 🤘
-    </footer>
+    <!-- ACCESOS RÁPIDOS A 1 TOQUE -->
+    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-3 shadow-md">
+      <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+        <span class="flex items-center"><i data-lucide="zap" class="w-3.5 h-3.5 mr-1 text-amber-400"></i> Botones Rápida Entrada</span>
+        <span class="text-[10px] text-slate-500 font-normal">Toca para agregar</span>
+      </p>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <button onclick="quickAdd('Almuerzo', 10.00, 'Almuerzo')" class="flex items-center justify-between p-2 bg-slate-800/90 hover:bg-slate-800 border border-slate-700/70 rounded-xl transition-all active:scale-95 text-left">
+          <div>
+            <p class="text-[11px] text-slate-400 font-medium">🍲 Almuerzo</p>
+            <p class="text-xs font-bold text-emerald-400">S/ 10.00</p>
+          </div>
+          <div class="w-5 h-5 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-xs font-bold">+</div>
+        </button>
 
+        <button onclick="quickAdd('Cena', 10.00, 'Cena')" class="flex items-center justify-between p-2 bg-slate-800/90 hover:bg-slate-800 border border-slate-700/70 rounded-xl transition-all active:scale-95 text-left">
+          <div>
+            <p class="text-[11px] text-slate-400 font-medium">🌙 Cena</p>
+            <p class="text-xs font-bold text-emerald-400">S/ 10.00</p>
+          </div>
+          <div class="w-5 h-5 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-xs font-bold">+</div>
+        </button>
+
+        <button onclick="quickAdd('Desayuno', 3.00, 'Desayuno')" class="flex items-center justify-between p-2 bg-slate-800/90 hover:bg-slate-800 border border-slate-700/70 rounded-xl transition-all active:scale-95 text-left">
+          <div>
+            <p class="text-[11px] text-slate-400 font-medium">☕ Desayuno</p>
+            <p class="text-xs font-bold text-emerald-400">S/ 3.00</p>
+          </div>
+          <div class="w-5 h-5 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-xs font-bold">+</div>
+        </button>
+
+        <button onclick="quickAdd('Pasajes', 2.00, 'Pasaje')" class="flex items-center justify-between p-2 bg-slate-800/90 hover:bg-slate-800 border border-slate-700/70 rounded-xl transition-all active:scale-95 text-left">
+          <div>
+            <p class="text-[11px] text-slate-400 font-medium">🚌 Pasaje</p>
+            <p class="text-xs font-bold text-emerald-400">S/ 2.00</p>
+          </div>
+          <div class="w-5 h-5 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-xs font-bold">+</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- FORMULARIO DE REGISTRO MANUAL -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
+      <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider mb-3 flex items-center">
+        <i data-lucide="plus-circle" class="w-4 h-4 mr-1.5 text-emerald-400"></i> Registrar Gasto Manual
+      </h2>
+
+      <form id="expenseForm" onsubmit="handleFormSubmit(event)" class="space-y-3">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] text-slate-400 font-medium mb-1">Fecha</label>
+            <input type="date" id="expenseDate" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-medium text-white focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label class="block text-[11px] text-slate-400 font-medium mb-1">Categoría</label>
+            <select id="expenseCategory" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2 py-2 text-xs font-medium text-white focus:outline-none focus:border-emerald-500">
+              <option value="Almuerzo" selected>🍲 Almuerzo</option>
+              <option value="Cena">🌙 Cena</option>
+              <option value="Desayuno">☕ Desayuno</option>
+              <option value="Pasajes">🚌 Pasajes</option>
+              <option value="Varios/Otros">🛒 Varios / Otros</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-12 gap-2">
+          <div class="col-span-7">
+            <label class="block text-[11px] text-slate-400 font-medium mb-1">Concepto / Detalle</label>
+            <input type="text" id="expenseConcept" placeholder="Ej: Menú 10 soles, taxi..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+          </div>
+          <div class="col-span-5">
+            <label class="block text-[11px] text-slate-400 font-medium mb-1">Monto (S/)</label>
+            <div class="relative">
+              <span class="absolute left-2.5 top-2.5 text-xs text-slate-400 font-bold">S/</span>
+              <input type="number" id="expenseAmount" step="0.10" min="0.10" placeholder="0.00" required class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-8 pr-2 py-2 text-xs font-bold text-emerald-400 focus:outline-none focus:border-emerald-500">
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center space-x-1.5 active:scale-98">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span class="text-xs uppercase tracking-wider">Guardar Gasto</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- CONTENIDO DE PESTAÑAS -->
+    <div id="tabContent">
+
+      <!-- VISTA 1: HOY / FILTRO POR FECHA -->
+      <div id="viewHoy" class="space-y-3">
+        <div class="flex items-center justify-between bg-slate-900 border border-slate-800 rounded-xl px-3 py-2">
+          <div class="flex items-center space-x-2">
+            <span class="text-xs text-slate-400">Ver día:</span>
+            <input type="date" id="filterHoyDate" onchange="renderHoyView()" class="bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-emerald-400 font-bold focus:outline-none">
+          </div>
+          <div class="text-right">
+            <span class="text-[10px] text-slate-400 block">Subtotal Día</span>
+            <span id="todayTotalDisplay" class="text-sm font-extrabold text-amber-400">S/ 0.00</span>
+          </div>
+        </div>
+
+        <div id="todayExpensesList" class="space-y-2">
+        </div>
+      </div>
+
+      <!-- VISTA 2: HISTORIAL DÍA POR DÍA CON ELIMINAR INDIVIDUAL -->
+      <div id="viewHistorial" class="hidden space-y-3">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 shadow-md space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <div>
+              <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Historial Día por Día</h3>
+              <p class="text-[10px] text-slate-400">Toca el ícono 🗑️ para corregir o borrar un gasto</p>
+            </div>
+            <div class="flex space-x-1">
+              <button onclick="copyToClipboardText()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center space-x-1 border border-slate-700">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                <span>Copiar Texto</span>
+              </button>
+              <button onclick="exportCyclePDF()" class="p-1.5 bg-rose-950/60 hover:bg-rose-900/80 border border-rose-800/50 text-rose-300 rounded-xl text-xs font-semibold" title="Descargar PDF">
+                <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="historyDayByDayList" class="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA 3: RESUMEN DEL MES Y CICLOS -->
+      <div id="viewMes" class="hidden space-y-3">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md space-y-4">
+          
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+              <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Resumen General del Mes</h3>
+              <p class="text-[10px] text-slate-400">Acumulado total de 30 días</p>
+            </div>
+            <button onclick="exportMonthPDF()" class="px-3 py-1.5 bg-rose-900/80 hover:bg-rose-800 border border-rose-700 text-rose-100 rounded-xl text-xs font-bold flex items-center space-x-1">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+              <span>Descargar PDF Mes</span>
+            </button>
+          </div>
+
+          <!-- TARJETA DEL TOTAL MENSUAL ACUMULADO -->
+          <div class="p-3 bg-slate-950 rounded-xl border border-emerald-500/30 flex items-center justify-between">
+            <div>
+              <p class="text-xs text-slate-400 font-medium">Total Gastado en el Mes</p>
+              <p id="monthTotalDisplay" class="text-2xl font-extrabold text-emerald-400 mt-0.5">S/ 0.00</p>
+            </div>
+            <div class="text-right">
+              <p class="text-[10px] text-slate-500">Ciclos Registrados</p>
+              <p id="totalCyclesCount" class="text-base font-bold text-slate-300">0</p>
+            </div>
+          </div>
+
+          <!-- DESGLOSE POR CICLOS DEL MES -->
+          <div>
+            <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Desglose de Ciclos de S/ 100</h4>
+            <div id="monthCyclesList" class="space-y-2 max-h-[350px] overflow-y-auto">
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- PLANTILLA OCULTA PARA GENERAR REPORTES EN PDF -->
+  <div class="hidden">
+    <div id="pdfReportContainer" class="p-6 bg-white text-slate-900 font-sans leading-relaxed" style="width: 750px;">
+      <div id="pdfReportContent"></div>
+    </div>
   </div>
 
-  <script>
-    /* =========================================
-       1. EFECTO CANVAS (Púas y Fuego)
-       ========================================= */
-    const canvas = document.getElementById('fx-canvas');
-    const ctx = canvas.getContext('2d');
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
+  <!-- MODAL DE AJUSTES Y PRIVACIDAD -->
+  <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 max-w-sm w-full space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center">
+          <i data-lucide="shield-check" class="w-5 h-5 mr-2 text-emerald-400"></i> Opciones y Privacidad
+        </h3>
+        <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
 
-    window.addEventListener('resize', () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    });
+      <div class="space-y-3 text-xs text-slate-300">
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
+          <p class="font-bold text-emerald-400">🔒 Datos Privados y Locales</p>
+          <p class="text-slate-400">Todos los registros se quedan exclusivamente guardados en la memoria de tu celular.</p>
+        </div>
 
-    class Particle {
-      constructor() {
-        this.reset();
-      }
-      reset() {
-        this.x = Math.random() * width;
-        this.y = -20;
-        this.size = Math.random() * 12 + 6;
-        this.speedY = Math.random() * 3 + 1;
-        this.speedX = (Math.random() - 0.5) * 1.5;
-        this.rot = Math.random() * Math.PI * 2;
-        this.rotSpeed = (Math.random() - 0.5) * 0.1;
-        this.color = Math.random() > 0.4 ? '#ff1a40' : '#ff6600';
-      }
-      update() {
-        this.y += this.speedY;
-        this.x += this.speedX;
-        this.rot += this.rotSpeed;
-        if (this.y > height + 20) this.reset();
-      }
-      draw() {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.rot);
-        ctx.fillStyle = this.color;
-        
-        // Púa de guitarra
-        ctx.beginPath();
-        ctx.moveTo(0, -this.size / 2);
-        ctx.lineTo(this.size / 2, this.size / 2);
-        ctx.lineTo(0, this.size / 1.2);
-        ctx.lineTo(-this.size / 2, this.size / 2);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
-      }
-    }
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Monto Base por Ciclo (S/)</label>
+          <div class="flex space-x-2">
+            <input type="number" id="customBudgetInput" value="100" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white">
+            <button onclick="saveCustomBudget()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl font-bold">Guardar</button>
+          </div>
+        </div>
 
-    const particles = Array.from({ length: 25 }, () => new Particle());
+        <div class="pt-2 border-t border-slate-800 space-y-2">
+          <button onclick="confirmResetAll()" class="w-full bg-rose-950/60 hover:bg-rose-900/80 border border-rose-800/50 text-rose-300 font-semibold py-2 px-3 rounded-xl flex items-center justify-center space-x-2">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            <span>Borrar Todo el Historial</span>
+          </button>
+        </div>
+      </div>
 
-    function animateFX() {
-      ctx.clearRect(0, 0, width, height);
-      particles.forEach(p => {
-        p.update();
-        p.draw();
-      });
-      requestAnimationFrame(animateFX);
-    }
-    animateFX();
+      <div class="pt-2">
+        <button onclick="toggleSettingsModal()" class="w-full bg-slate-800 text-slate-300 font-bold py-2 rounded-xl text-xs">Cerrar</button>
+      </div>
+    </div>
+  </div>
 
-    function triggerFx() {
-      for(let i=0; i<15; i++) {
-        setTimeout(() => {
-          particles.push(new Particle());
-        }, i * 50);
-      }
-    }
-
-    /* =========================================
-       2. CARRUSEL CON SWIPE PARA MÓVILES
-       ========================================= */
-    const track = document.getElementById('carouselTrack');
-    const slides = document.querySelectorAll('.carousel-slide');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    let currentIndex = 0;
-
-    function updateCarousel() {
-      track.style.transform = `translateX(-${currentIndex * 100}%)`;
-    }
-
-    nextBtn.addEventListener('click', () => {
-      currentIndex = (currentIndex + 1) % track.children.length;
-      updateCarousel();
-    });
-
-    prevBtn.addEventListener('click', () => {
-      currentIndex = (currentIndex - 1 + track.children.length) % track.children.length;
-      updateCarousel();
-    });
-
-    // Soporte para gestos táctiles (Swipe)
-    let startX = 0;
-    const carouselEl = document.getElementById('carousel');
-
-    carouselEl.addEventListener('touchstart', (e) => {
-      startX = e.touches[0].clientX;
-    }, { passive: true });
-
-    carouselEl.addEventListener('touchend', (e) => {
-      let endX = e.changedTouches[0].clientX;
-      let diff = startX - endX;
-      if (Math.abs(diff) > 40) {
-        if (diff > 0) {
-          currentIndex = (currentIndex + 1) % track.children.length;
-        } else {
-          currentIndex = (currentIndex - 1 + track.children.length) % track.children.length;
-        }
-        updateCarousel();
-      }
-    }, { passive: true });
-
-    // Subir fotos personalizadas
-    document.getElementById('imgUploader').addEventListener('change', (e) => {
-      const files = e.target.files;
-      if (!files.length) return;
-
-      Array.from(files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const newSlide = document.createElement('div');
-          newSlide.className = 'carousel-slide';
-          newSlide.innerHTML = `
-            <img src="${event.target.result}" alt="Foto de Saúl">
-            <div class="slide-caption">⚡ ¡Momentos de Rock con Saúl! ⚡</div>
-          `;
-          track.appendChild(newSlide);
-        };
-        reader.readAsDataURL(file);
-      });
-      alert('¡Fotos agregadas al carrusel!');
-    });
-
-    /* =========================================
-       3. SINTETIZADOR AUDIO API (Riff Heavy Metal)
-       ========================================= */
-    let audioCtx = null;
-    let isPlaying = false;
-    let masterGain = null;
-    let timerId = null;
-
-    // Visualizador de audio
-    const visualizer = document.getElementById('visualizer');
-    const barsCount = 20;
-    const bars = [];
-    for (let i = 0; i < barsCount; i++) {
-      const bar = document.createElement('div');
-      bar.className = 'bar';
-      visualizer.appendChild(bar);
-      bars.push(bar);
-    }
-
-    function updateVisualizer() {
-      if (!isPlaying) {
-        bars.forEach(b => b.style.height = '10%');
-        return;
-      }
-      bars.forEach(b => {
-        const h = Math.floor(Math.random() * 85) + 15;
-        b.style.height = `${h}%`;
-      });
-    }
-    setInterval(updateVisualizer, 100);
-
-    function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        masterGain = audioCtx.createGain();
-        masterGain.gain.value = document.getElementById('volRange').value;
-        masterGain.connect(audioCtx.destination);
-      }
-    }
-
-    document.getElementById('volRange').addEventListener('input', (e) => {
-      if (masterGain) masterGain.gain.value = e.target.value;
-    });
-
-    function playMetalNote(freq, duration) {
-      if (!audioCtx) return;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-
-      // Sonido Distorsionado (Sawtooth)
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-
-      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-
-      osc.connect(gain);
-      gain.connect(masterGain);
-
-      osc.start();
-      osc.stop(audioCtx.currentTime + duration);
-    }
-
-    // Escala menor armónica (E, G, A, A#, B, D)
-    const riffNotes = [82.41, 98.00, 110.00, 116.54, 123.47, 146.83, 164.81];
-
-    function startRiff() {
-      let step = 0;
-      timerId = setInterval(() => {
-        let note = riffNotes[step % riffNotes.length];
-        if (step % 3 === 0) note = 82.41; // Tónica grave E
-        playMetalNote(note, 0.25);
-        step++;
-      }, 180);
-    }
-
-    const playBtn = document.getElementById('playBtn');
-    playBtn.addEventListener('click', () => {
-      initAudio();
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-
-      if (!isPlaying) {
-        isPlaying = true;
-        playBtn.innerHTML = '<i class="fa-solid fa-pause"></i><span>Pausar Música</span>';
-        startRiff();
-      } else {
-        isPlaying = false;
-        playBtn.innerHTML = '<i class="fa-solid fa-play"></i><span>Tocar Riff Metal</span>';
-        clearInterval(timerId);
-      }
-    });
-
-    /* =========================================
-       4. SOUNDBOARD DE EFECTOS
-       ========================================= */
-    function triggerSound(type) {
-      initAudio();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-
-      if (type === 'solo') {
-        for(let i = 0; i < 6; i++) {
-          setTimeout(() => {
-            let f = 300 + Math.random() * 500;
-            playMetalNote(f, 0.15);
-          }, i * 100);
-        }
-      } else if (type === 'drums') {
-        for(let i = 0; i < 8; i++) {
-          setTimeout(() => {
-            let osc = audioCtx.createOscillator();
-            let gain = audioCtx.createGain();
-            osc.frequency.setValueAtTime(100, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.08);
-            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
-            osc.connect(gain);
-            gain.connect(masterGain);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.08);
-          }, i * 80);
-        }
-      } else if (type === 'cheer') {
-        triggerFx();
-        alert('🤘 ¡HOY SE ROCKEA EN HONOR A SAÚL CRISTIAN! 🤘');
-      }
-    }
-
-    /* =========================================
-       5. ENVIAR SALUDO POR WHATSAPP
-       ========================================= */
-    function sendWhatsApp() {
-      const msg = encodeURIComponent("¡Feliz Cumpleaños Saúl Cristian! 🤘🔥 Te preparé esta página especial de Rock & Metal para celebrar tu día. ¡Que sigan los riffs al máximo!");
-      window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
-    }
-  </script>
-</body>
-</html>
+  <!-- TOAST DE NOTIFICACIÓN -->
+  <div id="toastNotification" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-emerald-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-2xl flex items-center space-x-2 transition-all duratio
