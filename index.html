@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>¡Feliz Cumpleaños Saúl Cristian! 🤘🔥</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Oswald:wght@400;600;700&family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-dark: #0a0a0c;
+      --panel-bg: #141419;
+      --metal-red: #ff1a40;
+      --metal-orange: #ff6600;
+      --metal-gold: #ffb700;
+      --text-main: #f0f0f5;
+      --text-muted: #a0a0b0;
+      --border-glow: rgba(255, 26, 64, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Montserrat', sans-serif;
+      overflow-x: hidden;
+      padding-bottom: 50px;
+    }
+
+    /* Background Canvas Animation */
+    #fx-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Container layout */
+    .app-container {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 15px;
+    }
+
+    /* Header Section */
+    header {
+      text-align: center;
+      padding: 25px 10px 15px;
+    }
+
+    .subtitle-badge {
+      display: inline-block;
+      background: linear-gradient(90deg, var(--metal-red), var(--metal-orange));
+      color: #fff;
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      box-shadow: 0 0 15px var(--border-glow);
+    }
+
+    h1.metal-title {
+      font-family: 'Metal Mania', cursive;
+      font-size: 2.8rem;
+      line-height: 1.1;
+      color: #fff;
+      text-shadow: 0 0 10px var(--metal-red), 0 0 20px var(--metal-orange);
+      margin-bottom: 8px;
+    }
+
+    @media (min-width: 600px) {
+      h1.metal-title {
+        font-size: 4rem;
+      }
+    }
+
+    p.tagline {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    /* Common Card Styles */
+    .card {
+      background: var(--panel-bg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+    }
+
+    .card-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.25rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--metal-gold);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    /* Carousel Styling */
+    .carousel-container {
+      position: relative;
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      aspect-ratio: 4 / 3;
+      background: #000;
+      touch-action: pan-y;
+      border: 2px solid rgba(255, 26, 64, 0.3);
+    }
+
+    .carousel-track {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.4s ease-out;
+    }
+
+    .carousel-slide {
+      min-width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .carousel-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .slide-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 15px 12px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.9));
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 5;
+      font-size: 1.1rem;
+    }
+
+    .carousel-btn.prev { left: 10px; }
+    .carousel-btn.next { right: 10px; }
+
+    .upload-box {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-upload {
+      background: rgba(255,255,255,0.05);
+      border: 1px dashed var(--metal-orange);
+      color: var(--metal-gold);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Audio Player Component */
+    .player-visualizer {
+      width: 100%;
+      height: 60px;
+      background: #08080a;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: flex-end;
+      padding: 5px;
+      gap: 3px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .bar {
+      flex: 1;
+      background: linear-gradient(to top, var(--metal-red), var(--metal-orange), var(--metal-gold));
+      height: 10%;
+      border-radius: 2px;
+      transition: height 0.05s ease;
+    }
+
+    .controls-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .btn-rock {
+      background: linear-gradient(135deg, var(--metal-red), #b3001e);
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px var(--border-glow);
+      flex: 1;
+      justify-content: center;
+      min-width: 140px;
+    }
+
+    .btn-rock:active {
+      transform: scale(0.97);
+    }
+
+    .volume-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Soundboard Grid */
+    .soundboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    @media (min-width: 500px) {
+      .soundboard-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .pad-btn {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 15px 10px;
+      text-align: center;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pad-btn i {
+      font-size: 1.4rem;
+      color: var(--metal-orange);
+    }
+
+    .pad-btn span {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .pad-btn:active, .pad-btn.active {
+      background: rgba(255, 102, 0, 0.2);
+      border-color: var(--metal-orange);
+      transform: scale(0.95);
+    }
+
+    /* Greeting Card Section */
+    .greeting-box {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #e0e0e0;
+      border-left: 3px solid var(--metal-red);
+      padding-left: 15px;
+      margin-bottom: 15px;
+    }
+
+    .btn-whatsapp {
+      background: #25D366;
+      color: #fff;
+      border: none;
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      padding-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="fx-canvas"></canvas>
+
+  <div class="app-container">
+    
+    <!-- HEADER -->
+    <header>
+      <span class="subtitle-badge">🤘 Heavy Metal Birthday 🤘</span>
+      <h1 class="metal-title">SAÚL CRISTIAN</h1>
+      <p class="tagline">¡Que el rock y el metal retumben hoy en tu honor!</p>
+    </header>
+
+    <!-- CAROUSEL DE FOTOS -->
+    <div class="card">
+      <div class="card-title">
+        <i class="fa-solid fa-images"></i>
+        <span>Galería de Rocker</span>
+      </div>
+
+      <div class="carousel-container" id="carousel">
+        <div class="carousel-track" id="carouselTrack">
+          <!-- Slide 1 -->
+          <div class="carousel-slide">
+            <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80" alt="Guitarra Metal">
+            <div class="slide-caption">🔥 ¡Feliz Cumpleaños Saúl Cristian! 🔥</div>
+          </div>
+          <!-- Slide 2 -->
+          <div class="carousel-slide">
+            <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80" alt="Concierto Rock">
+            <div class="slide-caption">🎸 ¡Que nunca paren los riffs y la buena música! 🎸</div>
+          </div>
+          <!-- Slide 3 -->
+          <div class="carousel-slide">
+            <img src="https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=800&q=80" alt="Luces de Concierto">
+            <div class="slide-caption">🚀 Un año más rompiéndola al máximo nivel.</div>
+          </div>
+        </div>
+
+        <button class="carousel-btn prev" id="prevBtn"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="carousel-btn next" id="nextBtn"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+
+      <div class="upload-box">
+        <label for="imgUploader" class="btn-upload">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span>Añadir tus fotos con Saúl</span>
+        </label>
+        <input type="file" id="imgUploader" accept="image/*" multiple style="display: none;">
+      </div>
+    </div>
+
+    <!-- REPRODUCTOR / SINTETIZADOR METAL -->
+    <div class="card">
+      <div class="card-title">
+        <i class="fa-solid fa-compact-disc"></i>
+        <span>Música & Riff De Fondo</span>
+      </div>
+
+      <div class="player-visualizer" id="visualizer">
+        <!-- Generado dinámicamente -->
+      </div>
+
+      <div class="controls-row">
+        <button class="btn-rock" id="playBtn">
+          <i class="fa-solid fa-play"></i>
+          <span>Tocar Riff Metal</span>
+        </button>
+
+        <div class="volume-box">
+          <i class="fa-solid fa-volume-high"></i>
+          <input type="range" id="volRange" min="0" max="1" step="0.1" value="0.7">
+        </div>
+      </div>
+    </div>
+
+    <!-- SOUNDBOARD INTERACTIVO -->
+    <div class="card">
+      <div class="card-title">
+        <i class="fa-solid fa-drum"></i>
+        <span>Efectos Metaleros</span>
+      </div>
+
+      <div class="soundboard-grid">
+        <button class="pad-btn" onclick="triggerSound('solo')">
+          <i class="fa-solid fa-guitar"></i>
+          <span>Solo Rápido</span>
+        </button>
+        <button class="pad-btn" onclick="triggerSound('drums')">
+          <i class="fa-solid fa-drum"></i>
+          <span>Doble Pedal</span>
+        </button>
+        <button class="pad-btn" onclick="triggerSound('cheer')">
+          <i class="fa-solid fa-people-group"></i>
+          <span>Público</span>
+        </button>
+        <button class="pad-btn" onclick="triggerFx()">
+          <i class="fa-solid fa-fire-flame-curved"></i>
+          <span>Fuego & Púas</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- SALUDO & MENSAJE -->
+    <div class="card">
+      <div class="card-title">
+        <i class="fa-solid fa-envelope-open-text"></i>
+        <span>Dedicatoria Especial</span>
+      </div>
+
+      <div class="greeting-box">
+        <p><strong>¡Hermano Saúl Cristian!</strong> 🤘🎉</p>
+        <p>Hoy en tu cumpleaños te deseo lo mejor de lo mejor. Que este nuevo año venga cargado de salud, proyectos cumplidos y sobre todo muchísima música de la buena, riffs potentes y conciertos inolvidables. ¡A celebrar como se debe!</p>
+      </div>
+
+      <button class="btn-whatsapp" onclick="sendWhatsApp()">
+        <i class="fa-brands fa-whatsapp"></i>
+        <span>Enviar Saludo por WhatsApp</span>
+      </button>
+    </div>
+
+    <footer>
+      Hecho especialmente para Saúl Cristian • Happy Birthday 🤘
+    </footer>
+
+  </div>
+
+  <script>
+    /* =========================================
+       1. EFECTO CANVAS (Púas y Fuego)
+       ========================================= */
+    const canvas = document.getElementById('fx-canvas');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * width;
+        this.y = -20;
+        this.size = Math.random() * 12 + 6;
+        this.speedY = Math.random() * 3 + 1;
+        this.speedX = (Math.random() - 0.5) * 1.5;
+        this.rot = Math.random() * Math.PI * 2;
+        this.rotSpeed = (Math.random() - 0.5) * 0.1;
+        this.color = Math.random() > 0.4 ? '#ff1a40' : '#ff6600';
+      }
+      update() {
+        this.y += this.speedY;
+        this.x += this.speedX;
+        this.rot += this.rotSpeed;
+        if (this.y > height + 20) this.reset();
+      }
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rot);
+        ctx.fillStyle = this.color;
+        
+        // Púa de guitarra
+        ctx.beginPath();
+        ctx.moveTo(0, -this.size / 2);
+        ctx.lineTo(this.size / 2, this.size / 2);
+        ctx.lineTo(0, this.size / 1.2);
+        ctx.lineTo(-this.size / 2, this.size / 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    const particles = Array.from({ length: 25 }, () => new Particle());
+
+    function animateFX() {
+      ctx.clearRect(0, 0, width, height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateFX);
+    }
+    animateFX();
+
+    function triggerFx() {
+      for(let i=0; i<15; i++) {
+        setTimeout(() => {
+          particles.push(new Particle());
+        }, i * 50);
+      }
+    }
+
+    /* =========================================
+       2. CARRUSEL CON SWIPE PARA MÓVILES
+       ========================================= */
+    const track = document.getElementById('carouselTrack');
+    const slides = document.querySelectorAll('.carousel-slide');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    let currentIndex = 0;
+
+    function updateCarousel() {
+      track.style.transform = `translateX(-${currentIndex * 100}%)`;
+    }
+
+    nextBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % track.children.length;
+      updateCarousel();
+    });
+
+    prevBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex - 1 + track.children.length) % track.children.length;
+      updateCarousel();
+    });
+
+    // Soporte para gestos táctiles (Swipe)
+    let startX = 0;
+    const carouselEl = document.getElementById('carousel');
+
+    carouselEl.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+    }, { passive: true });
+
+    carouselEl.addEventListener('touchend', (e) => {
+      let endX = e.changedTouches[0].clientX;
+      let diff = startX - endX;
+      if (Math.abs(diff) > 40) {
+        if (diff > 0) {
+          currentIndex = (currentIndex + 1) % track.children.length;
+        } else {
+          currentIndex = (currentIndex - 1 + track.children.length) % track.children.length;
+        }
+        updateCarousel();
+      }
+    }, { passive: true });
+
+    // Subir fotos personalizadas
+    document.getElementById('imgUploader').addEventListener('change', (e) => {
+      const files = e.target.files;
+      if (!files.length) return;
+
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const newSlide = document.createElement('div');
+          newSlide.className = 'carousel-slide';
+          newSlide.innerHTML = `
+            <img src="${event.target.result}" alt="Foto de Saúl">
+            <div class="slide-caption">⚡ ¡Momentos de Rock con Saúl! ⚡</div>
+          `;
+          track.appendChild(newSlide);
+        };
+        reader.readAsDataURL(file);
+      });
+      alert('¡Fotos agregadas al carrusel!');
+    });
+
+    /* =========================================
+       3. SINTETIZADOR AUDIO API (Riff Heavy Metal)
+       ========================================= */
+    let audioCtx = null;
+    let isPlaying = false;
+    let masterGain = null;
+    let timerId = null;
+
+    // Visualizador de audio
+    const visualizer = document.getElementById('visualizer');
+    const barsCount = 20;
+    const bars = [];
+    for (let i = 0; i < barsCount; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'bar';
+      visualizer.appendChild(bar);
+      bars.push(bar);
+    }
+
+    function updateVisualizer() {
+      if (!isPlaying) {
+        bars.forEach(b => b.style.height = '10%');
+        return;
+      }
+      bars.forEach(b => {
+        const h = Math.floor(Math.random() * 85) + 15;
+        b.style.height = `${h}%`;
+      });
+    }
+    setInterval(updateVisualizer, 100);
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = document.getElementById('volRange').value;
+        masterGain.connect(audioCtx.destination);
+      }
+    }
+
+    document.getElementById('volRange').addEventListener('input', (e) => {
+      if (masterGain) masterGain.gain.value = e.target.value;
+    });
+
+    function playMetalNote(freq, duration) {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      // Sonido Distorsionado (Sawtooth)
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+
+      osc.connect(gain);
+      gain.connect(masterGain);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    // Escala menor armónica (E, G, A, A#, B, D)
+    const riffNotes = [82.41, 98.00, 110.00, 116.54, 123.47, 146.83, 164.81];
+
+    function startRiff() {
+      let step = 0;
+      timerId = setInterval(() => {
+        let note = riffNotes[step % riffNotes.length];
+        if (step % 3 === 0) note = 82.41; // Tónica grave E
+        playMetalNote(note, 0.25);
+        step++;
+      }, 180);
+    }
+
+    const playBtn = document.getElementById('playBtn');
+    playBtn.addEventListener('click', () => {
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      if (!isPlaying) {
+        isPlaying = true;
+        playBtn.innerHTML = '<i class="fa-solid fa-pause"></i><span>Pausar Música</span>';
+        startRiff();
+      } else {
+        isPlaying = false;
+        playBtn.innerHTML = '<i class="fa-solid fa-play"></i><span>Tocar Riff Metal</span>';
+        clearInterval(timerId);
+      }
+    });
+
+    /* =========================================
+       4. SOUNDBOARD DE EFECTOS
+       ========================================= */
+    function triggerSound(type) {
+      initAudio();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      if (type === 'solo') {
+        for(let i = 0; i < 6; i++) {
+          setTimeout(() => {
+            let f = 300 + Math.random() * 500;
+            playMetalNote(f, 0.15);
+          }, i * 100);
+        }
+      } else if (type === 'drums') {
+        for(let i = 0; i < 8; i++) {
+          setTimeout(() => {
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.08);
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+            osc.connect(gain);
+            gain.connect(masterGain);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.08);
+          }, i * 80);
+        }
+      } else if (type === 'cheer') {
+        triggerFx();
+        alert('🤘 ¡HOY SE ROCKEA EN HONOR A SAÚL CRISTIAN! 🤘');
+      }
+    }
+
+    /* =========================================
+       5. ENVIAR SALUDO POR WHATSAPP
+       ========================================= */
+    function sendWhatsApp() {
+      const msg = encodeURIComponent("¡Feliz Cumpleaños Saúl Cristian! 🤘🔥 Te preparé esta página especial de Rock & Metal para celebrar tu día. ¡Que sigan los riffs al máximo!");
+      window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
+    }
+  </script>
+</body>
+</html>
