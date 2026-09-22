@@ -193,7 +193,7 @@
       </div>
     </div>
 
-    <!-- REGISTRO MANUAL (SIN FORM PARA EVITAR RECARGAS ACCIDENTALES) -->
+    <!-- REGISTRO MANUAL -->
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
       <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider mb-3 flex items-center">
         <i data-lucide="plus-circle" class="w-4 h-4 mr-1.5 text-emerald-400"></i> Registrar Gasto Manual
@@ -369,4 +369,487 @@
   </div>
 
   <!-- TOAST DE NOTIFICACIÓN -->
-  <div id="toastNotification" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-emerald-600 text-w
+  <div id="toastNotification" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xl transition-all duration-300 opacity-0 pointer-events-none z-50">
+    ¡Operación realizada!
+  </div>
+
+  <!-- ========================================== -->
+  <!-- SCRIPT CON TODA LA LÓGICA E INTERACTIVIDAD -->
+  <!-- ========================================== -->
+  <script>
+    const STORAGE_KEY = 'priv_expenses_app_data_v2';
+    
+    let appData = {
+      baseBudget: 100,
+      activeCycleId: 1,
+      cycles: [
+        {
+          id: 1,
+          name: 'Ciclo 1',
+          budget: 100,
+          startDate: getTodayFormatted(),
+          expenses: []
+        }
+      ]
+    };
+
+    function getTodayFormatted() {
+      const today = new Date();
+      return today.toISOString().split('T')[0];
+    }
+
+    function initApp() {
+      loadData();
+      
+      const todayStr = getTodayFormatted();
+      document.getElementById('expenseDate').value = todayStr;
+      document.getElementById('filterHoyDate').value = todayStr;
+      
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById('headerDateText').textContent = new Date().toLocaleDateString('es-PE', options);
+
+      renderAll();
+    }
+
+    function loadData() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          appData = JSON.parse(saved);
+        }
+      } catch(e) {
+        console.error("Error al cargar datos", e);
+      }
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+      } catch(e) {
+        console.error("Error al guardar datos", e);
+      }
+    }
+
+    function getActiveCycle() {
+      return appData.cycles.find(c => c.id === appData.activeCycleId) || appData.cycles[0];
+    }
+
+    function renderAll() {
+      renderCycleHeader();
+      renderHoyView();
+      renderHistorialView();
+      renderMesView();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderCycleHeader() {
+      const activeCycle = getActiveCycle();
+      const totalSpent = activeCycle.expenses.reduce((sum, e) => sum + e.amount, 0);
+      const remaining = activeCycle.budget - totalSpent;
+      const percent = Math.min(100, Math.round((totalSpent / activeCycle.budget) * 100)) || 0;
+
+      document.getElementById('cycleLabel').textContent = activeCycle.name;
+      document.getElementById('cycleBudgetDisplay').textContent = activeCycle.budget.toFixed(2);
+      document.getElementById('remainingDisplay').textContent = `S/ ${remaining.toFixed(2)}`;
+      document.getElementById('cycleSpentDisplay').textContent = `S/ ${totalSpent.toFixed(2)}`;
+      document.getElementById('progressPercent').textContent = `${percent}%`;
+      
+      const pBar = document.getElementById('progressBar');
+      pBar.style.width = `${percent}%`;
+      if (percent >= 90) {
+        pBar.className = "h-full bg-gradient-to-r from-amber-500 to-rose-500 rounded-full transition-all duration-500";
+      } else {
+        pBar.className = "h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500";
+      }
+
+      const selector = document.getElementById('cycleSelector');
+      selector.innerHTML = '';
+      appData.cycles.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = `${c.name} (${c.startDate})`;
+        if (c.id === appData.activeCycleId) opt.selected = true;
+        selector.appendChild(opt);
+      });
+    }
+
+    function changeCycle(id) {
+      appData.activeCycleId = parseInt(id);
+      saveData();
+      renderAll();
+      showToast("Ciclo cambiado");
+    }
+
+    function startNewCycle() {
+      const newId = appData.cycles.length + 1;
+      const newCycle = {
+        id: newId,
+        name: `Ciclo ${newId}`,
+        budget: appData.baseBudget || 100,
+        startDate: getTodayFormatted(),
+        expenses: []
+      };
+      appData.cycles.unshift(newCycle);
+      appData.activeCycleId = newId;
+      saveData();
+      renderAll();
+      showToast("¡Nuevo ciclo de S/ 100 iniciado!");
+    }
+
+    function handleExpenseSave() {
+      const date = document.getElementById('expenseDate').value || getTodayFormatted();
+      const category = document.getElementById('expenseCategory').value;
+      const concept = document.getElementById('expenseConcept').value.trim() || category;
+      const amount = parseFloat(document.getElementById('expenseAmount').value);
+
+      if (isNaN(amount) || amount <= 0) {
+        alert("Ingresa un monto válido mayor a 0");
+        return;
+      }
+
+      const activeCycle = getActiveCycle();
+      const newExpense = {
+        id: Date.now(),
+        date: date,
+        category: category,
+        concept: concept,
+        amount: amount
+      };
+
+      activeCycle.expenses.unshift(newExpense);
+      saveData();
+
+      document.getElementById('expenseConcept').value = '';
+      document.getElementById('expenseAmount').value = '';
+
+      renderAll();
+      showToast("Gasto guardado con éxito");
+    }
+
+    function quickAdd(category, amount, concept) {
+      const date = getTodayFormatted();
+      const activeCycle = getActiveCycle();
+      
+      const newExpense = {
+        id: Date.now(),
+        date: date,
+        category: category,
+        concept: concept,
+        amount: amount
+      };
+
+      activeCycle.expenses.unshift(newExpense);
+      saveData();
+      renderAll();
+      showToast(`+ S/ ${amount.toFixed(2)} registrado (${category})`);
+    }
+
+    function deleteExpense(expenseId) {
+      if (!confirm("¿Deseas eliminar este gasto?")) return;
+      const activeCycle = getActiveCycle();
+      activeCycle.expenses = activeCycle.expenses.filter(e => e.id !== expenseId);
+      saveData();
+      renderAll();
+      showToast("Gasto eliminado");
+    }
+
+    function renderHoyView() {
+      const filterDate = document.getElementById('filterHoyDate').value || getTodayFormatted();
+      const activeCycle = getActiveCycle();
+      const expensesToday = activeCycle.expenses.filter(e => e.date === filterDate);
+      
+      const container = document.getElementById('todayExpensesList');
+      container.innerHTML = '';
+
+      const totalDay = expensesToday.reduce((acc, e) => acc + e.amount, 0);
+      document.getElementById('todayTotalDisplay').textContent = `S/ ${totalDay.toFixed(2)}`;
+
+      if (expensesToday.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-6 bg-slate-900/50 border border-slate-800/80 rounded-xl text-slate-500 text-xs">
+            No hay gastos registrados para la fecha ${filterDate}
+          </div>
+        `;
+        return;
+      }
+
+      expensesToday.forEach(e => {
+        container.innerHTML += `
+          <div class="flex items-center justify-between p-3 bg-slate-900 border border-slate-800 rounded-xl shadow-sm">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-emerald-400 font-bold text-xs">
+                S/
+              </div>
+              <div>
+                <p class="text-xs font-bold text-white">${escapeHtml(e.concept)}</p>
+                <p class="text-[10px] text-slate-400">${e.category} • ${e.date}</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-extrabold text-emerald-400">S/ ${e.amount.toFixed(2)}</span>
+              <button onclick="deleteExpense(${e.id})" class="p-1 text-slate-500 hover:text-rose-400 transition-colors">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function renderHistorialView() {
+      const activeCycle = getActiveCycle();
+      const container = document.getElementById('historyDayByDayList');
+      container.innerHTML = '';
+
+      if (activeCycle.expenses.length === 0) {
+        container.innerHTML = `<p class="text-center py-4 text-xs text-slate-500">Sin gastos en este ciclo.</p>`;
+        return;
+      }
+
+      const grouped = {};
+      activeCycle.expenses.forEach(e => {
+        if (!grouped[e.date]) grouped[e.date] = [];
+        grouped[e.date].push(e);
+      });
+
+      Object.keys(grouped).sort().reverse().forEach(date => {
+        const list = grouped[date];
+        const dayTotal = list.reduce((a, b) => a + b.amount, 0);
+        
+        let itemsHtml = list.map(item => `
+          <div class="flex items-center justify-between py-1.5 border-b border-slate-800/50 last:border-none">
+            <div>
+              <span class="text-xs text-slate-200 font-medium">${escapeHtml(item.concept)}</span>
+              <span class="text-[10px] text-slate-500 block">${item.category}</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold text-slate-300">S/ ${item.amount.toFixed(2)}</span>
+              <button onclick="deleteExpense(${item.id})" class="text-slate-500 hover:text-rose-400">
+                <i data-lucide="trash-2" class="w-3 h-3"></i>
+              </button>
+            </div>
+          </div>
+        `).join('');
+
+        container.innerHTML += `
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800/80 space-y-2">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+              <span class="text-xs font-bold text-emerald-400">${date}</span>
+              <span class="text-xs font-extrabold text-amber-400">Total: S/ ${dayTotal.toFixed(2)}</span>
+            </div>
+            <div class="space-y-1">
+              ${itemsHtml}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function renderMesView() {
+      const container = document.getElementById('monthCyclesList');
+      container.innerHTML = '';
+
+      let globalTotal = 0;
+      document.getElementById('totalCyclesCount').textContent = appData.cycles.length;
+
+      appData.cycles.forEach(cycle => {
+        const cycleTotal = cycle.expenses.reduce((a, b) => a + b.amount, 0);
+        globalTotal += cycleTotal;
+
+        container.innerHTML += `
+          <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-white">${cycle.name}</p>
+              <p class="text-[10px] text-slate-400">Inicio: ${cycle.startDate} • ${cycle.expenses.length} registros</p>
+            </div>
+            <div class="text-right">
+              <span class="text-xs font-bold text-emerald-400">S/ ${cycleTotal.toFixed(2)}</span>
+              <span class="text-[10px] text-slate-500 block">de S/ ${cycle.budget.toFixed(2)}</span>
+            </div>
+          </div>
+        `;
+      });
+
+      document.getElementById('monthTotalDisplay').textContent = `S/ ${globalTotal.toFixed(2)}`;
+    }
+
+    function switchTab(tab) {
+      document.getElementById('viewHoy').classList.add('hidden');
+      document.getElementById('viewHistorial').classList.add('hidden');
+      document.getElementById('viewMes').classList.add('hidden');
+
+      const btnHoy = document.getElementById('tabHoy');
+      const btnHist = document.getElementById('tabHistorial');
+      const btnMes = document.getElementById('tabMes');
+
+      [btnHoy, btnHist, btnMes].forEach(btn => {
+        btn.className = "py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center space-x-1 text-slate-400 hover:text-slate-200";
+      });
+
+      if (tab === 'hoy') {
+        document.getElementById('viewHoy').classList.remove('hidden');
+        btnHoy.className = "py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center space-x-1 bg-emerald-600 text-white shadow";
+      } else if (tab === 'historial') {
+        document.getElementById('viewHistorial').classList.remove('hidden');
+        btnHist.className = "py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center space-x-1 bg-emerald-600 text-white shadow";
+      } else if (tab === 'mes') {
+        document.getElementById('viewMes').classList.remove('hidden');
+        btnMes.className = "py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center space-x-1 bg-emerald-600 text-white shadow";
+      }
+    }
+
+    function shareWhatsApp() {
+      const activeCycle = getActiveCycle();
+      const totalSpent = activeCycle.expenses.reduce((a, b) => a + b.amount, 0);
+      const remaining = activeCycle.budget - totalSpent;
+
+      let msg = `*CONTROL DE GASTOS - ${activeCycle.name.toUpperCase()}*\n`;
+      msg += `Presupuesto: S/ ${activeCycle.budget.toFixed(2)}\n`;
+      msg += `Gastado: S/ ${totalSpent.toFixed(2)}\n`;
+      msg += `Disponible: S/ ${remaining.toFixed(2)}\n\n`;
+      msg += `*RESUMEN DE GASTOS:*\n`;
+
+      if (activeCycle.expenses.length === 0) {
+        msg += `Sin registros aún.\n`;
+      } else {
+        activeCycle.expenses.slice(0, 10).forEach(e => {
+          msg += `• ${e.date} - ${e.concept}: S/ ${e.amount.toFixed(2)}\n`;
+        });
+      }
+
+      const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+      window.open(url, '_blank');
+    }
+
+    function copyToClipboardText() {
+      const activeCycle = getActiveCycle();
+      let text = `Reporte ${activeCycle.name}:\n`;
+      activeCycle.expenses.forEach(e => {
+        text += `${e.date} | ${e.concept} | S/ ${e.amount.toFixed(2)}\n`;
+      });
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Texto copiado al portapapeles");
+      });
+    }
+
+    function exportCyclePDF() {
+      const activeCycle = getActiveCycle();
+      const content = document.getElementById('pdfReportContent');
+      const totalSpent = activeCycle.expenses.reduce((a, b) => a + b.amount, 0);
+
+      content.innerHTML = `
+        <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 5px;">Reporte de Gastos: ${activeCycle.name}</h2>
+        <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Fecha de Inicio: ${activeCycle.startDate}</p>
+        <div style="margin-bottom: 20px; padding: 10px; background: #f1f5f9; border-radius: 8px;">
+          <p><strong>Presupuesto:</strong> S/ ${activeCycle.budget.toFixed(2)}</p>
+          <p><strong>Total Gastado:</strong> S/ ${totalSpent.toFixed(2)}</p>
+          <p><strong>Restante:</strong> S/ ${(activeCycle.budget - totalSpent).toFixed(2)}</p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+          <thead>
+            <tr style="background: #0f172a; color: #fff; text-align: left;">
+              <th style="padding: 8px;">Fecha</th>
+              <th style="padding: 8px;">Categoría</th>
+              <th style="padding: 8px;">Concepto</th>
+              <th style="padding: 8px; text-align: right;">Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${activeCycle.expenses.map(e => `
+              <tr style="border-bottom: 1px solid #ddd;">
+                <td style="padding: 8px;">${e.date}</td>
+                <td style="padding: 8px;">${e.category}</td>
+                <td style="padding: 8px;">${escapeHtml(e.concept)}</td>
+                <td style="padding: 8px; text-align: right; font-weight: bold;">S/ ${e.amount.toFixed(2)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      const element = document.getElementById('pdfReportContainer');
+      const opt = {
+        margin: 0.5,
+        filename: `Reporte_${activeCycle.name}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+
+      html2pdf().set(opt).from(element).save();
+    }
+
+    function exportMonthPDF() {
+      const content = document.getElementById('pdfReportContent');
+      let globalTotal = 0;
+
+      let html = `
+        <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 15px;">Resumen Consolidado del Mes</h2>
+      `;
+
+      appData.cycles.forEach(c => {
+        const cTotal = c.expenses.reduce((a, b) => a + b.amount, 0);
+        globalTotal += cTotal;
+        html += `
+          <div style="margin-bottom: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+            <h3 style="font-size: 14px; font-weight: bold;">${c.name} (${c.startDate})</h3>
+            <p style="font-size: 12px;">Gastado: S/ ${cTotal.toFixed(2)} de S/ ${c.budget.toFixed(2)}</p>
+          </div>
+        `;
+      });
+
+      html += `<h3 style="font-size: 16px; font-weight: bold; margin-top: 20px;">TOTAL GASTADO EN EL MES: S/ ${globalTotal.toFixed(2)}</h3>`;
+      content.innerHTML = html;
+
+      const element = document.getElementById('pdfReportContainer');
+      const opt = {
+        margin: 0.5,
+        filename: `Resumen_Mes.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+
+      html2pdf().set(opt).from(element).save();
+    }
+
+    function toggleSettingsModal() {
+      const modal = document.getElementById('settingsModal');
+      modal.classList.toggle('hidden');
+    }
+
+    function saveCustomBudget() {
+      const val = parseFloat(document.getElementById('customBudgetInput').value);
+      if (!isNaN(val) && val > 0) {
+        appData.baseBudget = val;
+        saveData();
+        showToast("Presupuesto base actualizado");
+        toggleSettingsModal();
+      }
+    }
+
+    function confirmResetAll() {
+      if (confirm("¿ATENCIÓN: Quieres borrar absolutamente todos los gastos e historial de la app?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        location.reload();
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
+      toast.textContent = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 2500);
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    // Inicializar app al cargar ventana
+    window.onload = initApp;
+  </script>
+</body>
+</html>
